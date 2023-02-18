@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Danbooru Gallery</title>
+    <style>
+      /* стили для галереи */
+      .gallery {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+        flex: 1 1 auto;
+      }
+      .gallery img {
+        max-width: 100%;
+        height: auto;
+        margin: 10px;
+        cursor: pointer;
+        box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.3);
+        margin: 10px;
+      }
+
+      /* стили для боковой панели */
+      .sidebar {
+        float: left;
+        width: 300px;
+        height: 100vh;
+        background-color: #f2f2f2;
+        border-right: 1px solid #ccc;
+        padding: 20px;
+        box-sizing: border-box;
+        background: linear-gradient(to bottom, #f2f2f2, #d9d9d9);
+        flex: 0 0 300px;
+        margin-right: 20px;
+      }
+
+      .sidebar h2 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .sidebar input {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+
+      .sidebar label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .sidebar button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-top: 20px;
+      }
+
+      /* стили для отделителя */
+      .separator {
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 20px;
+        margin: 20px 0;
+      }
+
+      body {
+        font-family: 'Roboto', sans-serif;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      button:hover {
+      background-color: #2ecc71;
+      }
+
+      button:active {
+      transform: scale(0.95);
+      transition: all 0.2s;
+      }
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      function loadImages() {
+        var tags = $('#tags').val();
+        var count = $('#count').val();
+        var api_url = 'https://danbooru.donmai.us/posts.json?tags=' + tags + '&random=true&limit=' + count;
+
+        $.ajax({
+          url: api_url,
+          type: 'GET',
+          dataType: 'json',
+          success: function(data) {
+            var gallery = $('.gallery');
+            gallery.empty();
+            $.each(data, function(i, post) {
+              var img = $('<img>');
+              img.attr('src', post.large_file_url);
+              img.attr('data-file-url', post.file_url);
+              img.attr('data-tags', post.tag_string);
+              gallery.append(img);
+            });
+          },
+          error: function() {
+            alert('Ошибка при загрузке изображений');
+          }
+        });
+      }
+
+
+      $(document).ready(function() {
+  $('.gallery').on('click', 'img', function() {
+  var file_url = $(this).data('file-url');
+  window.open(file_url, '_blank');
+});
+});
+    </script>
+  </head>
+  <body>
+        <div class="sidebar">
+      <h2>Поиск случайных изображений по тегам</h2>
+      <input type="text" id="tags" placeholder="Введите теги">
+      <label for="count">Количество изображений:</label>
+      <input type="number" id="count" min="1" max="20" value="10">
+      <button onclick="loadImages()">Загрузить изображения</button>
+      <div class="separator"></div>
+      <h2>Рекомендуемые теги</h2>
+      <ul>
+        <li>anime</li>
+        <li>manga</li>
+        <li>game_cg</li>
+        <li>art</li>
+        <li>landscape</li>
+      </ul>
+    </div>
+    <div class="gallery"></div>
+
+    <script>
+      function loadImages() {
+  var tags = $("#tags").val();
+  var count = $("#count").val();
+
+  $.ajax({
+    url: 'https://danbooru.donmai.us/posts.json?tags=' + tags + '&random=true&limit=' + count,
+    data: {
+      tags: tags,
+      limit: count
+    },
+    success: function(posts) {
+      var gallery = $(".gallery");
+      gallery.empty();
+      for (var i = 0; i < posts.length; i++) {
+        var post = posts[i];
+        var previewUrl = post.preview_file_url;
+        var fileUrl = post.file_url;
+        var img = $("<img>").attr("src", previewUrl);
+        img.data("file-url", fileUrl);
+        var item = $("<div>").addClass("gallery-item").append(img);
+        gallery.append(item);
+      }
+    }
+  });
+}
+    </script>
